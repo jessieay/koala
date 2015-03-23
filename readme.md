@@ -89,6 +89,26 @@ You can also make multiple calls at once using Facebook's batch API:
 end
 ```
 
+You can pass headers to Graph API calls via the `options` hash. For example, if
+you want to optimize graph api data fetching with <a
+href="https://developers.facebook.com/blog/post/627/">ETags</a>, you can make a
+graph call like this:
+
+```ruby
+etag_from_last_request = "\"123abc\""
+@graph.get_object("me", headers: { "If-None-Match" => etag_from_last_request })
+```
+
+If the ETag passed in the headers matches the current ETag, Koala will not
+return data for the endpoint. Instead, the response will look like:
+
+```ruby
+{
+  "message" => "Response not modified",
+  "response_code" => "304",
+}
+```
+
 You can pass a "post-processing" block to each of Koala's Graph API methods. This is handy for two reasons:
 
 1. You can modify the result returned by the Graph API method:

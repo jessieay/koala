@@ -500,7 +500,12 @@ module Koala
         options = {:appsecret_proof => true}.merge(options) if @app_secret
         result = api(path, args, verb, options) do |response|
           error = check_response(response.status, response.body)
-          raise error if error
+          cached_response = check_for_cached_response(response.status)
+          if error
+            raise error
+          elsif cached_response
+            return cached_response
+          end
         end
 
         # turn this into a GraphCollection if it's pageable
@@ -544,6 +549,15 @@ module Koala
           else
             ClientError.new(http_status, response_body, error_info)
           end
+        end
+      end
+
+      def check_for_cached_response(status)
+        if status.to_i == 304
+          {
+            "message" => "Response not modified",
+            "response_code" => "304",
+          }
         end
       end
 
