@@ -509,7 +509,11 @@ module Koala
         end
 
         # turn this into a GraphCollection if it's pageable
-        result = GraphCollection.evaluate(result, self)
+        if options[:http_component] && options[:http_component] == :response
+          result = GraphCollection.evaluate(result.body, self, result.headers)
+        else
+          result = GraphCollection.evaluate(result, self)
+        end
 
         # now process as appropriate for the given call (get picture header, etc.)
         post_processing ? post_processing.call(result) : result

@@ -41,6 +41,16 @@ describe Koala::Facebook::GraphCollection do
     expect(@collection.api).to eq(@api)
   end
 
+  context "http_component: :response option sent with request" do
+    it "sets the headers to the provided headers" do
+      headers = { "test_header" => "value" }
+
+      collection = Koala::Facebook::GraphCollection.new(@result, @api, headers)
+
+      expect(collection.headers).to eq(headers)
+    end
+  end
+
   describe "when getting a whole page" do
     before(:each) do
       @second_page = {
@@ -55,14 +65,14 @@ describe Koala::Facebook::GraphCollection do
     it "should return the previous page of results" do
       expect(@collection).to receive(:previous_page_params).and_return([@base, @args])
       expect(@api).to receive(:api).with(@base, @args, anything, anything).and_return(@second_page)
-      expect(Koala::Facebook::GraphCollection).to receive(:new).with(@second_page, @api).and_return(@page_of_results)
+      expect(Koala::Facebook::GraphCollection).to receive(:new).with(@second_page, @api, nil).and_return(@page_of_results)
       expect(@collection.previous_page).to eq(@page_of_results)
     end
 
     it "should return the next page of results" do
       expect(@collection).to receive(:next_page_params).and_return([@base, @args])
       expect(@api).to receive(:api).with(@base, @args, anything, anything).and_return(@second_page)
-      expect(Koala::Facebook::GraphCollection).to receive(:new).with(@second_page, @api).and_return(@page_of_results)
+      expect(Koala::Facebook::GraphCollection).to receive(:new).with(@second_page, @api, nil).and_return(@page_of_results)
 
       expect(@collection.next_page).to eq(@page_of_results)
     end
@@ -139,7 +149,7 @@ describe Koala::Facebook::GraphCollection do
     it "returns a new GraphCollection of the result if it has an array data key and a paging key" do
       result = {"data" => [], "paging" => {}}
       expected = :foo
-      expect(Koala::Facebook::GraphCollection).to receive(:new).with(result, @api).and_return(expected)
+      expect(Koala::Facebook::GraphCollection).to receive(:new).with(result, @api, nil).and_return(expected)
       expect(Koala::Facebook::GraphCollection.evaluate(result, @api)).to eq(expected)
     end
   end

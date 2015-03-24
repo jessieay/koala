@@ -80,7 +80,7 @@ describe 'Koala::Facebook::GraphAPIMethods' do
 
       it "is enabled by default if an app secret is present" do
         api = Koala::Facebook::API.new(@token, "mysecret")
-        expect(api).to receive(:api).with(path, {}, 'get', :appsecret_proof => true)
+        expect(api).to receive(:api).with(path, {}, 'get', appsecret_proof: true)
         api.graph_call(path)
       end
 
@@ -93,6 +93,38 @@ describe 'Koala::Facebook::GraphAPIMethods' do
       it "isn't included if no app secret is present" do
         expect(@api).to receive(:api).with(path, {}, 'get', {})
         @api.graph_call(path)
+      end
+
+      describe "the http_component option" do
+        it "sends the http_component option to the API call" do
+          api = Koala::Facebook::API.new(@token, "mysecret")
+          response_double = double(headers: nil, body: nil)
+          expect(api).to receive(:api).with(
+            path,
+            {},
+            'get',
+            { appsecret_proof: true, http_component: :response },
+          ).and_return(response_double)
+
+          api.graph_call(path, {}, 'get', http_component: :response)
+        end
+
+        it "sends the response headers to the GraphCollection" do
+          api = Koala::Facebook::API.new(@token, "mysecret")
+          headers = double
+          body = double
+          response_double = double(headers: headers, body: body)
+          allow(api).to receive(:api).with(
+            path,
+            {},
+            'get',
+            { appsecret_proof: true, http_component: :response },
+          ).and_return(response_double)
+
+          expect(Koala::Facebook::GraphCollection).to receive(:evaluate).with(body, api, headers)
+
+          api.graph_call(path, {}, 'get', http_component: :response)
+        end
       end
     end
   end
