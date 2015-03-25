@@ -510,7 +510,8 @@ module Koala
 
         # turn this into a GraphCollection if it's pageable
         if options[:http_component] && options[:http_component] == :response
-          result = GraphCollection.evaluate(result.body, self, result.headers)
+          body = MultiJson.load("[#{result.body.to_s}]")[0]
+          result = GraphCollection.evaluate(body, self, result.headers)
         else
           result = GraphCollection.evaluate(result, self)
         end

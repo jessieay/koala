@@ -112,7 +112,7 @@ describe 'Koala::Facebook::GraphAPIMethods' do
         it "sends the response headers to the GraphCollection" do
           api = Koala::Facebook::API.new(@token, "mysecret")
           headers = double
-          body = double
+          body = {}
           response_double = double(headers: headers, body: body)
           allow(api).to receive(:api).with(
             path,
